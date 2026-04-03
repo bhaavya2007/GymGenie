@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    background: #0f0f0f;
+    color: white;
+    font-family: Arial;
+    padding: 40px;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #00ffae;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Setup Your Plan</h2>
+
+<form method="POST">
+
+Age:
+<input name="age" required>
+
+Weight (kg):
+<input name="weight" required>
+
+<!-- GOALS -->
+Goal:
+<select name="goal">
+<option>Fat Loss</option>
+<option>Muscle Gain</option>
+<option>Strength Training</option>
+<option>Endurance</option>
+<option>Athletic Performance</option>
+<option>Flexibility & Mobility</option>
+<option>General Fitness</option>
+<option>Rehabilitation</option>
+</select>
+
+<!-- DAYS -->
+Days per Week:
+<select name="days">
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+</select>
+
+<!-- EQUIPMENT -->
+Equipment:
+<select name="equipment">
+<option>None (Home Workout)</option>
+<option>Resistance Bands</option>
+<option>Dumbbells</option>
+<option>Kettlebell</option>
+<option>Barbell</option>
+<option>Machines</option>
+<option>Full Gym Access</option>
+</select>
+
+<!-- LEVEL -->
+Level:
+<select name="difficulty">
+<option>Beginner</option>
+<option>Intermediate</option>
+<option>Advanced</option>
+</select>
+
+<!-- INJURY -->
+Injuries / Conditions:
+<input name="diseases" placeholder="e.g. knee pain, back pain">
+
+<button type="submit">Generate Plan</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

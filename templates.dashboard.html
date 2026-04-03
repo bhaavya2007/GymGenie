@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    background:#0f0f0f;
+    color:white;
+    font-family:sans-serif;
+    margin:0;
+}
+
+/* TOPBAR */
+.topbar {
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+    background:#111;
+}
+
+button {
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* CARDS */
+.card {
+    background:#1e1e1e;
+    margin:20px;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+    font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <h3>Dashboard</h3>
+
+    <div>
+        <a href="/plan">
+            <button style="background:#00ffae;color:black;">
+                ← Back to Workout
+            </button>
+        </a>
+
+        <a href="/logout">
+            <button style="background:red;color:white;">
+                Logout
+            </button>
+        </a>
+    </div>
+</div>
+
+<!-- DATA CARDS -->
+<div class="card">
+🔥 Current Streak: <b>{{streak}}</b>
+</div>
+
+<div class="card">
+🔥 Total Calories Burned: <b>{{calories}}</b>
+</div>
+
+<!-- GRAPH -->
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
+<script>
+new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+        labels: ["Calories"],
+        datasets: [{
+            label: "Your Progress",
+            data: [{{calories}}],
+        }]
+    }
+});
+</script>
+
+</body>
+</html>

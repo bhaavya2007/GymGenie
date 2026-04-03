@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;background:#0f0f0f;color:white;font-family:sans-serif;}
+
+.topbar{
+display:flex;justify-content:space-between;
+padding:15px;background:#111;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+padding:20px;
+}
+
+.card{
+background:#1e1e1e;
+padding:20px;
+border-radius:10px;
+text-align:center;
+}
+
+.big{
+grid-column:span 2;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<h2>Dashboard</h2>
+
+<div>
+<a href="/plan">
+<button style="background:#00ffae;color:black;">← Workout</button>
+</a>
+
+<a href="/logout">
+<button style="background:red;color:white;">Logout</button>
+</a>
+</div>
+</div>
+
+<div class="grid">
+
+<div class="card">
+🔥 Streak<br><b>{{streak}}</b>
+</div>
+
+<div class="card">
+🔥 Calories<br><b>{{calories}}</b>
+</div>
+
+<div class="card big">
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+let dataPoints = {{ history if history else [0] }};
+let labels = Array.from({length: dataPoints.length}, (_, i) => i+1);
+
+new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Calories Progress",
+            data: dataPoints,
+            borderWidth: 2
+        }]
+    }
+});
+</script>
+
+</body>
+</html>

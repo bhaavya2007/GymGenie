@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+    margin:0;
+    background:#0f0f0f;
+    color:white;
+    font-family:sans-serif;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+    background:#111;
+}
+
+.container{
+    padding:20px;
+}
+
+.user{
+    background:#1e1e1e;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<h2 style="
+background: linear-gradient(90deg,#00ffae,#00c3ff);
+-webkit-background-clip: text;
+color: transparent;
+">GYMGENIE ⚡</h2>
+
+<a href="/plan"><button style="background:#00ffae;">⬅ Back</button></a>
+</div>
+
+<div class="container">
+
+<h2>🏆 Leaderboard</h2>
+
+{% for u in users %}
+<div class="user">
+<span>{{u[0]}}</span>
+<span>🔥 {{u[1]}}</span>
+</div>
+{% endfor %}
+
+</div>
+
+</body>
+</html>

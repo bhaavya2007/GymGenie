@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+    margin:0;
+    background:#0f0f0f;
+    color:white;
+    font-family:sans-serif;
+    text-align:center;
+}
+
+.topbar {
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+    background:#111;
+}
+
+img {
+    width:90%;
+    max-width:500px;
+    border-radius:10px;
+}
+
+button {
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <h3>Posture Check</h3>
+
+    <div>
+        <a href="/plan">
+            <button style="background:#00ffae;color:black;">
+                ← Back
+            </button>
+        </a>
+
+        <a href="/logout">
+            <button style="background:red;color:white;">
+                Logout
+            </button>
+        </a>
+    </div>
+</div>
+
+<h2>Live Form Detection</h2>
+
+<img src="/video_feed">
+
+<p>Keep your body aligned and complete reps properly.</p>
+
+</body>
+</html>

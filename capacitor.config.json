@@ -1,0 +1,9 @@
+{
+  "appId": "com.gymgenie.app",
+  "appName": "GymGenie",
+  "webDir": "www",
+  "server": {
+    "url": "http://172.17.35.61:5050",
+    "cleartext": true
+  }
+}

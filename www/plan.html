@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{margin:0;background:#0f0f0f;color:white;font-family:sans-serif;}
+
+.topbar{
+display:flex;justify-content:space-between;
+padding:15px;background:#111;
+}
+
+.progress{
+width:90%;margin:10px auto;background:#222;border-radius:10px;
+}
+
+.bar{
+height:15px;background:linear-gradient(90deg,#00ffae,#00c3ff);
+border-radius:10px;
+}
+
+.container{display:flex;}
+
+.left{width:70%;padding:20px;}
+.right{width:30%;padding:20px;background:#141414;height:90vh;overflow:auto;}
+
+.card{
+background:#1e1e1e;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,255,174,0.2);
+}
+
+.done{background:#063;}
+
+button{
+padding:6px 12px;border:none;border-radius:6px;cursor:pointer;
+}
+
+.chat-btn{
+position:fixed;bottom:20px;right:20px;
+background:#00ffae;padding:15px;border-radius:50%;
+}
+
+.chat-box{
+position:fixed;bottom:80px;right:20px;
+background:#1e1e1e;padding:10px;border-radius:10px;
+display:none;width:250px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<div>Progress {{percent}}% | Calories {{calories}}</div>
+
+<div>
+<a href="/dashboard"><button style="background:#00ffae;">Dashboard</button></a>
+<a href="/leaderboard"><button style="background:#00c3ff;">Leaderboard</button></a>
+<a href="/logout"><button style="background:red;color:white;">Logout</button></a>
+</div>
+</div>
+
+<div class="progress">
+<div class="bar" style="width:{{percent}}%"></div>
+</div>
+
+<div class="container">
+
+<div class="left">
+
+{% for d in plan %}
+{% set di = loop.index0 %}
+<h2>{{d.day}}</h2>
+
+{% for ex in d.exercises %}
+{% set key = di ~ "-" ~ loop.index0 %}
+
+<div class="card {% if key in progress %}done{% endif %}">
+
+<b>{{ex.name}}</b> ({{ex.sets}}) - {{ex.cal}} kcal<br>
+
+<iframe width="250" height="140" src="{{ex.link}}"></iframe><br>
+
+<a href="/complete/{{di}}/{{loop.index0}}">
+<button style="background:#00ffae;">✔ Complete</button>
+</a>
+
+<a href="/posture">
+<button style="background:#00c3ff;">📷 Check Form</button>
+</a>
+
+</div>
+
+{% endfor %}
+{% endfor %}
+
+</div>
+
+<div class="right">
+
+<h3>Exercise Benefits</h3>
+
+{% for d in plan %}
+{% for ex in d.exercises %}
+<p><b>{{ex.name}}</b><br><small>{{ex.benefit}}</small></p>
+{% endfor %}
+{% endfor %}
+
+</div>
+
+</div>
+
+<!-- CHAT -->
+<div class="chat-btn" onclick="toggleChat()">💬</div>
+
+<div class="chat-box" id="chat">
+<input id="msg" placeholder="Ask AI..." style="width:100%">
+<button onclick="sendMsg()">Send</button>
+<p id="reply"></p>
+</div>
+
+<script>
+function toggleChat(){
+let c=document.getElementById("chat");
+c.style.display=c.style.display=="block"?"none":"block";
+}
+
+function sendMsg(){
+fetch("/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({msg:document.getElementById("msg").value})
+})
+.then(r=>r.json())
+.then(d=>document.getElementById("reply").innerText=d.reply);
+}
+</script>
+
+</body>
+</html>

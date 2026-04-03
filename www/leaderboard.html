@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{background:#0f0f0f;color:white;font-family:sans-serif;text-align:center;}
+
+.card{
+margin:10px auto;
+padding:15px;
+width:80%;
+background:#1e1e1e;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,255,174,0.2);
+}
+
+.gold{border-left:5px solid gold;}
+.silver{border-left:5px solid silver;}
+.bronze{border-left:5px solid #cd7f32;}
+
+h1{color:#00ffae;}
+</style>
+</head>
+
+<body>
+
+<h1>🏆 Leaderboard</h1>
+
+{% for u in users %}
+
+<div class="card 
+{% if loop.index==1 %}gold
+{% elif loop.index==2 %}silver
+{% elif loop.index==3 %}bronze
+{% endif %}
+">
+
+#{{loop.index}}<br>
+<b>{{u[0]}}</b><br>
+🔥 Streak: {{u[1]}}
+
+</div>
+
+{% endfor %}
+
+<a href="/plan">
+<button style="background:#00ffae;padding:10px;border:none;border-radius:6px;">
+← Back
+</button>
+</a>
+
+</body>
+</html>
