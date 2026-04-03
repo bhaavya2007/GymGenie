@@ -6,7 +6,7 @@ app.secret_key = "secret123"
 
 DB = "workout.db"
 
-# ---------------- DB INIT ----------------
+# ---------------- INIT DB ----------------
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -26,8 +26,7 @@ def init_db():
         email TEXT,
         plan TEXT,
         progress TEXT,
-        calories INTEGER,
-        history TEXT
+        calories INTEGER
     )
     """)
 
@@ -36,14 +35,14 @@ def init_db():
 
 init_db()
 
-# ---------------- SAFE DB FETCH ----------------
+# ---------------- SAFE FETCH ----------------
 def safe_get(query, params=(), default=0):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute(query, params)
     row = c.fetchone()
     conn.close()
-    return row[0] if row and row[0] is not None else default
+    return row[0] if row and row[0] else default
 
 # ---------------- STREAK ----------------
 def update_streak(email):
@@ -60,7 +59,7 @@ def update_streak(email):
     if last:
         last = datetime.datetime.strptime(last,"%Y-%m-%d").date()
         if last == today:
-            return streak
+            return
         elif last == today - datetime.timedelta(days=1):
             streak += 1
         else:
@@ -73,27 +72,22 @@ def update_streak(email):
 
     conn.commit()
     conn.close()
-    return streak
 
 # ---------------- PLAN ----------------
 def generate_plan(days):
     base = [
-        {"name":"Push Ups","benefit":"Chest","cal":50},
-        {"name":"Squats","benefit":"Legs","cal":60},
-        {"name":"Plank","benefit":"Core","cal":30},
-        {"name":"Burpees","benefit":"Fat burn","cal":100},
-        {"name":"Crunches","benefit":"Abs","cal":40}
+        {"name":"Push Ups","benefit":"Chest","cal":50,"link":"https://www.youtube.com/embed/IODxDxX7oi4"},
+        {"name":"Squats","benefit":"Legs","cal":60,"link":"https://www.youtube.com/embed/aclHkVaku9U"},
+        {"name":"Plank","benefit":"Core","cal":30,"link":"https://www.youtube.com/embed/pSHjTRCQxIw"},
+        {"name":"Burpees","benefit":"Fat Burn","cal":100,"link":"https://www.youtube.com/embed/TU8QYVW0gDU"},
+        {"name":"Crunches","benefit":"Abs","cal":40,"link":"https://www.youtube.com/embed/Xyd_fa5zoEU"}
     ]
 
-    plan=[]
+    plan = []
     for i in range(int(days)):
-        exercises=[]
+        exercises = []
         for e in random.sample(base,5):
-            exercises.append({
-                "name":e["name"],
-                "benefit":e["benefit"],
-                "cal":e["cal"]
-            })
+            exercises.append(e)
         plan.append({"day":f"Day {i+1}","exercises":exercises})
     return plan
 
@@ -113,7 +107,7 @@ def signup():
             conn.commit()
             return redirect("/")
         except:
-            return "User already exists"
+            return "User exists"
     return render_template("signup.html")
 
 @app.route("/login", methods=["POST"])
@@ -141,14 +135,14 @@ def input_page():
         return redirect("/")
 
     if request.method=="POST":
-        plan=generate_plan(request.form["days"])
+        plan = generate_plan(request.form["days"])
 
-        conn=sqlite3.connect(DB)
-        c=conn.cursor()
+        conn = sqlite3.connect(DB)
+        c = conn.cursor()
 
         c.execute("DELETE FROM workouts WHERE email=?", (session["email"],))
-        c.execute("INSERT INTO workouts VALUES (?,?,?,?,?)",
-                  (session["email"], json.dumps(plan), json.dumps({}), 0, json.dumps([])))
+        c.execute("INSERT INTO workouts VALUES (?,?,?,?)",
+                  (session["email"], json.dumps(plan), json.dumps({}), 0))
 
         conn.commit()
         return redirect("/plan")
@@ -212,32 +206,23 @@ def complete(d,e):
     conn.commit()
     return redirect("/plan")
 
-# ✅ FIXED DASHBOARD
 @app.route("/dashboard")
 def dashboard():
     if "email" not in session:
         return redirect("/")
 
-    streak = safe_get("SELECT streak FROM users WHERE email=?", (session["email"],), 0)
-    calories = safe_get("SELECT calories FROM workouts WHERE email=?", (session["email"],), 0)
+    streak = safe_get("SELECT streak FROM users WHERE email=?", (session["email"],))
+    calories = safe_get("SELECT calories FROM workouts WHERE email=?", (session["email"],))
 
-    return render_template("dashboard.html",
-                           streak=streak,
-                           calories=calories)
+    return render_template("dashboard.html", streak=streak, calories=calories)
 
-# ✅ POSTURE ROUTE
 @app.route("/posture")
 def posture():
     if "email" not in session:
         return redirect("/")
 
     score = random.randint(60,100)
-
-    return f"""
-    <h1>Posture Score: {score}/100</h1>
-    <p>Keep your back straight and core tight.</p>
-    <a href='/plan'>Back</a>
-    """
+    return f"<h1>Posture Score: {score}/100</h1><a href='/plan'>Back</a>"
 
 @app.route("/leaderboard")
 def leaderboard():
@@ -245,7 +230,6 @@ def leaderboard():
     c=conn.cursor()
     c.execute("SELECT email,streak FROM users ORDER BY streak DESC LIMIT 10")
     users=c.fetchall()
-
     return render_template("leaderboard.html", users=users)
 
 # ---------------- RUN ----------------

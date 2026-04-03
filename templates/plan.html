@@ -1,276 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#00ffae">
+    <title>Workout Plan</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+        }
 
-<style>
-body{
-margin:0;
-font-family:-apple-system;
-background:linear-gradient(180deg,#0f0f0f,#000);
-color:white;
-}
+        .card {
+            background: #1e293b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 12px;
+        }
 
-/* TOPBAR */
-.topbar{
-display:flex;
-justify-content:space-between;
-padding:15px;
-background:rgba(20,20,20,0.8);
-backdrop-filter:blur(10px);
-align-items:center;
-}
+        .done {
+            background: #16a34a !important;
+        }
 
-.logo{
-background: linear-gradient(90deg,#00ffae,#00c3ff);
--webkit-background-clip: text;
-color: transparent;
-font-size:22px;
-font-weight:bold;
-}
+        iframe {
+            border-radius: 10px;
+            margin-top: 10px;
+        }
 
-/* BUTTON */
-button{
-padding:10px 14px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-size:14px;
-}
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+        }
 
-button:active{
-transform:scale(0.95);
-}
+        a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
 
-/* PROGRESS */
-.progress-bar{
-height:12px;
-background:#333;
-border-radius:10px;
-overflow:hidden;
-}
+        .progress {
+            background: #334155;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
 
-.progress{
-height:100%;
-background:linear-gradient(90deg,#00ffae,#00c3ff);
-}
-
-/* CARDS */
-.exercise{
-background:#1e1e1e;
-padding:15px;
-border-radius:14px;
-margin:15px;
-transition:0.3s;
-box-shadow:0 4px 15px rgba(0,0,0,0.4);
-}
-
-.exercise:hover{
-transform:scale(1.02);
-}
-
-.completed{
-background:#0f3d2e;
-border:2px solid #00ffae;
-}
-
-/* CHAT */
-.chat{
-position:fixed;
-bottom:20px;
-right:20px;
-}
-
-.chat button{
-width:55px;
-height:55px;
-border-radius:50%;
-background:#00ffae;
-font-size:20px;
-}
-
-#chatBox{
-display:none;
-position:fixed;
-bottom:90px;
-right:20px;
-width:260px;
-background:#1e1e1e;
-padding:12px;
-border-radius:12px;
-}
-
-/* UPI */
-#upiBox{
-display:none;
-position:fixed;
-top:25%;
-left:10%;
-width:80%;
-background:#111;
-padding:20px;
-border-radius:12px;
-text-align:center;
-box-shadow:0 0 20px rgba(0,0,0,0.6);
-}
-
-iframe{
-border-radius:12px;
-margin-top:10px;
-}
-</style>
+        .progress-bar {
+            background: #22c55e;
+            height: 10px;
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
-<div class="logo">GYMGENIE ⚡</div>
-
-<div>
-<a href="/dashboard"><button>Dashboard</button></a>
-<a href="/leaderboard"><button>Leaderboard</button></a>
-<a href="/logout"><button style="background:red;">Logout</button></a>
-</div>
-</div>
-
-<!-- PROGRESS -->
-<div style="padding:15px;">
-<h3>Progress: {{percent}}%</h3>
-
-<div class="progress-bar">
-<div class="progress" style="width:{{percent}}%;"></div>
+    <h2>GymGenie</h2>
+    <div>
+        <a href="/dashboard">Dashboard</a> |
+        <a href="/leaderboard">Leaderboard</a> |
+        <a href="/logout">Logout</a>
+    </div>
 </div>
 
-<h3>🔥 Calories: {{calories}}</h3>
+<h3>Calories: {{ calories }}</h3>
+
+<div class="progress">
+    <div class="progress-bar" style="width: {{ percent }}%"></div>
 </div>
 
-<!-- PRO + POSTURE -->
-<div style="text-align:center;margin:15px;">
-<button onclick="showUPI()" style="background:gold;">⭐ Go Pro</button>
-
-{% if pro %}
-<a href="/posture">
-<button style="background:#00c3ff;">📷 Check Form</button>
-</a>
-{% else %}
-<button onclick="showUPI()" style="background:gray;">🔒 Check Form</button>
-{% endif %}
-</div>
-
-<!-- BADGES -->
-{% if session.badges %}
-<div style="padding:15px;">
-<h3>🏆 Badges</h3>
-{% for b in session.badges %}
-<span style="background:#222;padding:8px 12px;border-radius:10px;margin:5px;display:inline-block;">
-{{b}}
-</span>
-{% endfor %}
-</div>
-{% endif %}
-
-<!-- SCORE -->
-{% if session.score %}
-<h3 style="padding-left:15px;">⚡ Performance Score: {{session.score}} / 100</h3>
-{% endif %}
-
-<!-- WORKOUT -->
 {% for day in plan %}
-{% set d = loop.index0 %}
+    <h3>{{ day.day }}</h3>
 
-<h2 style="padding-left:15px;">{{day.day}}</h2>
+    {% for ex in day.exercises %}
+        {% set key = loop.index0 ~ '-' ~ loop.index0 %}
+        <div class="card {% if key in progress %}done{% endif %}">
+            <h4>{{ ex.name }}</h4>
+            <p>{{ ex.benefit }}</p>
 
-{% for ex in day.exercises %}
-{% set e = loop.index0 %}
-{% set key = d ~ '-' ~ e %}
+            <iframe width="100%" height="200"
+                src="{{ ex.link }}"
+                allowfullscreen>
+            </iframe>
 
-<div class="exercise {% if key in progress %}completed{% endif %}">
-
-<h3>{{ex.name}}</h3>
-<p>🎯 {{ex.benefit}}</p>
-<p>🔥 {{ex.cal}} cal | {{ex.sets}}</p>
-
-<iframe width="100%" height="200" src="{{ex.link}}"></iframe>
-
-{% if key in progress %}
-<button style="background:#00ffae;">✔ Completed</button>
-{% else %}
-<a href="/complete/{{d}}/{{e}}">
-<button style="background:#00ffae;">Complete</button>
-</a>
-{% endif %}
-
-</div>
-
-{% endfor %}
+            <br><br>
+            <a href="/complete/{{ loop.index0 }}/{{ loop.index0 }}">Complete</a>
+        </div>
+    {% endfor %}
 {% endfor %}
 
-<!-- UPI PAYMENT -->
-<div id="upiBox">
-<h3>Upgrade to Pro ₹499</h3>
-<p><b>bhaavya2007@okaxis</b></p>
-
-<button onclick="confirmPayment()" style="background:#00ffae;">I Paid</button>
-<button onclick="closeUPI()" style="background:red;">Cancel</button>
-</div>
-
-<!-- CHAT -->
-<div class="chat">
-<button onclick="toggleChat()">💬</button>
-</div>
-
-<div id="chatBox">
-<input id="msg" placeholder="Ask AI coach..." style="width:100%;margin-bottom:5px;">
-<button onclick="sendMsg()">Send</button>
-<p id="reply"></p>
-</div>
-
-<!-- CONFETTI -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-<script>
-const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.get("done")){
-confetti({particleCount:150,spread:70,origin:{y:0.6}});
-}
-
-/* UPI */
-function showUPI(){document.getElementById("upiBox").style.display="block";}
-function closeUPI(){document.getElementById("upiBox").style.display="none";}
-
-function confirmPayment(){
-fetch("/unlock_pro",{method:"POST"})
-.then(res=>res.json())
-.then(data=>{
-if(data.status==="success"){
-alert("Pro Activated 🚀");
-location.reload();
-}
-});
-}
-
-/* CHAT */
-function toggleChat(){
-let box=document.getElementById("chatBox");
-box.style.display = box.style.display==="none"?"block":"none";
-}
-
-function sendMsg(){
-let msg=document.getElementById("msg").value;
-
-fetch("/chat",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({msg:msg})
-})
-.then(res=>res.json())
-.then(data=>{
-document.getElementById("reply").innerText=data.reply;
-});
-}
-</script>
+<br>
+<a href="/posture">Check Form</a>
 
 </body>
 </html>
