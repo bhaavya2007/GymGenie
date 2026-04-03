@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, Response
+from flask import Flask, render_template, request, redirect, session, jsonify
 import sqlite3, json, random, datetime, os
 
 app = Flask(__name__)
@@ -6,7 +6,7 @@ app.secret_key = "secret123"
 
 DB = "workout.db"
 
-# ---------------- DATABASE ----------------
+# ---------------- DB INIT ----------------
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -27,8 +27,7 @@ def init_db():
         plan TEXT,
         progress TEXT,
         calories INTEGER,
-        history TEXT,
-        reps TEXT
+        history TEXT
     )
     """)
 
@@ -36,6 +35,15 @@ def init_db():
     conn.close()
 
 init_db()
+
+# ---------------- SAFE DB FETCH ----------------
+def safe_get(query, params=(), default=0):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute(query, params)
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row and row[0] is not None else default
 
 # ---------------- STREAK ----------------
 def update_streak(email):
@@ -70,24 +78,21 @@ def update_streak(email):
 # ---------------- PLAN ----------------
 def generate_plan(days):
     base = [
-        {"name":"Push Ups","benefit":"Chest","cal":50,"link":"https://www.youtube.com/embed/IODxDxX7oi4"},
-        {"name":"Squats","benefit":"Legs","cal":60,"link":"https://www.youtube.com/embed/aclHkVaku9U"},
-        {"name":"Plank","benefit":"Core","cal":30,"link":"https://www.youtube.com/embed/pSHjTRCQxIw"},
-        {"name":"Burpees","benefit":"Fat burn","cal":100,"link":"https://www.youtube.com/embed/TU8QYVW0gDU"},
-        {"name":"Crunches","benefit":"Abs","cal":40,"link":"https://www.youtube.com/embed/Xyd_fa5zoEU"}
+        {"name":"Push Ups","benefit":"Chest","cal":50},
+        {"name":"Squats","benefit":"Legs","cal":60},
+        {"name":"Plank","benefit":"Core","cal":30},
+        {"name":"Burpees","benefit":"Fat burn","cal":100},
+        {"name":"Crunches","benefit":"Abs","cal":40}
     ]
 
     plan=[]
     for i in range(int(days)):
-        daily=random.sample(base,5)
         exercises=[]
-        for e in daily:
+        for e in random.sample(base,5):
             exercises.append({
                 "name":e["name"],
                 "benefit":e["benefit"],
-                "cal":e["cal"],
-                "link":e["link"],
-                "sets":"3 x 12"
+                "cal":e["cal"]
             })
         plan.append({"day":f"Day {i+1}","exercises":exercises})
     return plan
@@ -108,7 +113,7 @@ def signup():
             conn.commit()
             return redirect("/")
         except:
-            return "User exists"
+            return "User already exists"
     return render_template("signup.html")
 
 @app.route("/login", methods=["POST"])
@@ -142,8 +147,8 @@ def input_page():
         c=conn.cursor()
 
         c.execute("DELETE FROM workouts WHERE email=?", (session["email"],))
-        c.execute("INSERT INTO workouts VALUES (?,?,?,?,?,?)",
-                  (session["email"], json.dumps(plan), json.dumps({}), 0, json.dumps([]), json.dumps([])))
+        c.execute("INSERT INTO workouts VALUES (?,?,?,?,?)",
+                  (session["email"], json.dumps(plan), json.dumps({}), 0, json.dumps([])))
 
         conn.commit()
         return redirect("/plan")
@@ -172,15 +177,11 @@ def plan():
     total=sum(len(d["exercises"]) for d in plan)
     percent=int((len(progress)/total)*100) if total else 0
 
-    c.execute("SELECT pro FROM users WHERE email=?", (session["email"],))
-    pro=c.fetchone()[0]
-
     return render_template("plan.html",
                            plan=plan,
                            progress=progress,
                            percent=percent,
-                           calories=calories,
-                           pro=pro)
+                           calories=calories)
 
 @app.route("/complete/<int:d>/<int:e>")
 def complete(d,e):
@@ -211,56 +212,41 @@ def complete(d,e):
     conn.commit()
     return redirect("/plan")
 
+# ✅ FIXED DASHBOARD
 @app.route("/dashboard")
 def dashboard():
     if "email" not in session:
         return redirect("/")
 
-    conn=sqlite3.connect(DB)
-    c=conn.cursor()
-
-    c.execute("SELECT streak FROM users WHERE email=?", (session["email"],))
-    streak=c.fetchone()[0]
-
-    c.execute("SELECT calories FROM workouts WHERE email=?", (session["email"],))
-    calories=c.fetchone()[0]
+    streak = safe_get("SELECT streak FROM users WHERE email=?", (session["email"],), 0)
+    calories = safe_get("SELECT calories FROM workouts WHERE email=?", (session["email"],), 0)
 
     return render_template("dashboard.html",
                            streak=streak,
                            calories=calories)
 
+# ✅ POSTURE ROUTE
+@app.route("/posture")
+def posture():
+    if "email" not in session:
+        return redirect("/")
+
+    score = random.randint(60,100)
+
+    return f"""
+    <h1>Posture Score: {score}/100</h1>
+    <p>Keep your back straight and core tight.</p>
+    <a href='/plan'>Back</a>
+    """
+
 @app.route("/leaderboard")
 def leaderboard():
     conn=sqlite3.connect(DB)
     c=conn.cursor()
-
     c.execute("SELECT email,streak FROM users ORDER BY streak DESC LIMIT 10")
     users=c.fetchall()
 
     return render_template("leaderboard.html", users=users)
-
-@app.route("/chat", methods=["POST"])
-def chat():
-    msg=request.json.get("msg","").lower()
-
-    if "tired" in msg:
-        reply="Take rest. Recovery builds strength 💪"
-    else:
-        reply="Stay consistent 🔥"
-
-    return jsonify({"reply":reply})
-
-@app.route("/unlock_pro", methods=["POST"])
-def unlock_pro():
-    if "email" not in session:
-        return jsonify({"status":"fail"})
-
-    conn=sqlite3.connect(DB)
-    c=conn.cursor()
-    c.execute("UPDATE users SET pro=1 WHERE email=?", (session["email"],))
-    conn.commit()
-
-    return jsonify({"status":"success"})
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

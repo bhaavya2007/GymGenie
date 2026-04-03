@@ -3,7 +3,8 @@
   "appName": "GymGenie",
   "webDir": "www",
   "server": {
-    "url": "http://172.17.35.61:5050",
+    "url": "https://gymgenie-tedz.onrender.com",
     "cleartext": true
   }
 }
+
