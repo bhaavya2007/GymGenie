@@ -168,6 +168,7 @@ def plan():
                            percent=percent,
                            calories=calories)
 
+# ✅ FINAL UNIQUE KEY FIX
 @app.route("/complete/<int:d>/<int:e>")
 def complete(d,e):
     if "email" not in session:
@@ -184,7 +185,7 @@ def complete(d,e):
     plan=json.loads(row[1])
     calories=row[2] if row[2] else 0
 
-    key = f"{d}-{e}"
+    key = f"{d}-{e}-{plan[d]['exercises'][e]['name']}"
 
     if key not in progress:
         progress[key] = True
@@ -198,28 +199,32 @@ def complete(d,e):
     conn.close()
     return redirect("/plan")
 
-# ✅ DASHBOARD FIXED
+# ✅ DASHBOARD SAFE
 @app.route("/dashboard")
 def dashboard():
     if "email" not in session:
         return redirect("/")
 
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
+    try:
+        conn = sqlite3.connect(DB)
+        c = conn.cursor()
 
-    c.execute("SELECT streak FROM users WHERE email=?", (session["email"],))
-    row = c.fetchone()
-    streak = row[0] if row and row[0] is not None else 0
+        c.execute("SELECT streak FROM users WHERE email=?", (session["email"],))
+        row = c.fetchone()
+        streak = row[0] if row else 0
 
-    c.execute("SELECT calories FROM workouts WHERE email=?", (session["email"],))
-    row = c.fetchone()
-    calories = row[0] if row and row[0] is not None else 0
+        c.execute("SELECT calories FROM workouts WHERE email=?", (session["email"],))
+        row = c.fetchone()
+        calories = row[0] if row else 0
 
-    conn.close()
+        conn.close()
 
-    return render_template("dashboard.html", streak=streak, calories=calories)
+        return render_template("dashboard.html",
+                               streak=streak,
+                               calories=calories)
+    except Exception as e:
+        return f"Dashboard error: {str(e)}"
 
-# ✅ CAMERA PAGE
 @app.route("/posture")
 def posture():
     if "email" not in session:
