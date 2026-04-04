@@ -79,9 +79,9 @@ a {
 
     {% for ex in day.exercises %}
         {% set e = loop.index0 %}
-        {% set key = d ~ '-' ~ e %}
+        {% set key = (d|string) ~ '-' ~ (e|string) %}
 
-        <div class="card {% if key in progress %}done{% endif %}">
+        <div class="card {% if progress.get(key) %}done{% endif %}">
             <h4>{{ ex.name }}</h4>
             <p>{{ ex.benefit }}</p>
 

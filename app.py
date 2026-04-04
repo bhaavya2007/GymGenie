@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session
 import sqlite3, json, random, datetime, os
 
 app = Flask(__name__)
@@ -184,10 +184,10 @@ def complete(d,e):
     plan=json.loads(row[1])
     calories=row[2] if row[2] else 0
 
-    key=f"{d}-{e}"
+    key = f"{d}-{e}"
 
     if key not in progress:
-        progress[key]=True
+        progress[key] = True
         calories += plan[d]["exercises"][e]["cal"]
         update_streak(session["email"])
 
@@ -195,9 +195,10 @@ def complete(d,e):
               (json.dumps(progress),calories,session["email"]))
 
     conn.commit()
+    conn.close()
     return redirect("/plan")
 
-# ✅ FIXED DASHBOARD
+# ✅ DASHBOARD FIXED
 @app.route("/dashboard")
 def dashboard():
     if "email" not in session:
@@ -207,12 +208,14 @@ def dashboard():
     c = conn.cursor()
 
     c.execute("SELECT streak FROM users WHERE email=?", (session["email"],))
-    row1 = c.fetchone()
-    streak = row1[0] if row1 and row1[0] else 0
+    row = c.fetchone()
+    streak = row[0] if row and row[0] is not None else 0
 
     c.execute("SELECT calories FROM workouts WHERE email=?", (session["email"],))
-    row2 = c.fetchone()
-    calories = row2[0] if row2 and row2[0] else 0
+    row = c.fetchone()
+    calories = row[0] if row and row[0] is not None else 0
+
+    conn.close()
 
     return render_template("dashboard.html", streak=streak, calories=calories)
 
@@ -221,7 +224,6 @@ def dashboard():
 def posture():
     if "email" not in session:
         return redirect("/")
-
     return render_template("posture.html")
 
 @app.route("/leaderboard")
@@ -230,6 +232,7 @@ def leaderboard():
     c=conn.cursor()
     c.execute("SELECT email,streak FROM users ORDER BY streak DESC LIMIT 10")
     users=c.fetchall()
+    conn.close()
     return render_template("leaderboard.html", users=users)
 
 # ---------------- RUN ----------------
