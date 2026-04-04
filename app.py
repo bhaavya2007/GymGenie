@@ -35,15 +35,6 @@ def init_db():
 
 init_db()
 
-# ---------------- SAFE FETCH ----------------
-def safe_get(query, params=(), default=0):
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute(query, params)
-    row = c.fetchone()
-    conn.close()
-    return row[0] if row and row[0] else default
-
 # ---------------- STREAK ----------------
 def update_streak(email):
     conn = sqlite3.connect(DB)
@@ -206,23 +197,32 @@ def complete(d,e):
     conn.commit()
     return redirect("/plan")
 
+# ✅ FIXED DASHBOARD
 @app.route("/dashboard")
 def dashboard():
     if "email" not in session:
         return redirect("/")
 
-    streak = safe_get("SELECT streak FROM users WHERE email=?", (session["email"],))
-    calories = safe_get("SELECT calories FROM workouts WHERE email=?", (session["email"],))
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+
+    c.execute("SELECT streak FROM users WHERE email=?", (session["email"],))
+    row1 = c.fetchone()
+    streak = row1[0] if row1 and row1[0] else 0
+
+    c.execute("SELECT calories FROM workouts WHERE email=?", (session["email"],))
+    row2 = c.fetchone()
+    calories = row2[0] if row2 and row2[0] else 0
 
     return render_template("dashboard.html", streak=streak, calories=calories)
 
+# ✅ CAMERA PAGE
 @app.route("/posture")
 def posture():
     if "email" not in session:
         return redirect("/")
 
-    score = random.randint(60,100)
-    return f"<h1>Posture Score: {score}/100</h1><a href='/plan'>Back</a>"
+    return render_template("posture.html")
 
 @app.route("/leaderboard")
 def leaderboard():

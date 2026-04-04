@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GymGenie</title>
+
+<style>
+body {
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+    font-family:Arial;
+    padding:20px;
+}
+
+.card {
+    background:#1e293b;
+    padding:15px;
+    margin:15px 0;
+    border-radius:15px;
+}
+
+.done {
+    background:#22c55e !important;
+}
+
+iframe {
+    width:100%;
+    height:200px;
+    border-radius:10px;
+}
+
+.topbar {
+    display:flex;
+    justify-content:space-between;
+}
+
+a {
+    background:#38bdf8;
+    padding:6px 10px;
+    border-radius:8px;
+    color:black;
+    text-decoration:none;
+    margin-right:5px;
+}
+
+.progress {
+    background:#334155;
+    border-radius:10px;
+    overflow:hidden;
+    margin:15px 0;
+}
+
+.progress-bar {
+    background:#22c55e;
+    height:10px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+    <h2>GymGenie</h2>
+    <div>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<h3>Calories: {{ calories }}</h3>
+
+<div class="progress">
+    <div class="progress-bar" style="width: {{ percent }}%"></div>
+</div>
+
+{% for day in plan %}
+    {% set d = loop.index0 %}
+    <h3>{{ day.day }}</h3>
+
+    {% for ex in day.exercises %}
+        {% set e = loop.index0 %}
+        {% set key = d ~ '-' ~ e %}
+
+        <div class="card {% if key in progress %}done{% endif %}">
+            <h4>{{ ex.name }}</h4>
+            <p>{{ ex.benefit }}</p>
+
+            <iframe src="{{ ex.link }}"></iframe>
+
+            <br><br>
+
+            <a href="/complete/{{ d }}/{{ e }}">Complete</a>
+            <a href="/posture">Check Form</a>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+</body>
+</html>
